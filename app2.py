@@ -14,6 +14,7 @@ def detect_objects(image):
     detections = results[0].boxes
     img_with_boxes = np.array(image)
     detected_objects = []
+
     for detection in detections:
         x_min, y_min, x_max, y_max = detection.xyxy.numpy().astype(int).flatten()
         class_id = int(detection.cls[0])
@@ -23,6 +24,7 @@ def detect_objects(image):
         cv2.rectangle(img_with_boxes, (x_min, y_min), (x_max, y_max), color, 2)
         cv2.putText(img_with_boxes, f"{label} {confidence:.2f}", (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         detected_objects.append(label)
+    
     return img_with_boxes, detected_objects
 
 def chatbot_response(prompt):
@@ -37,18 +39,23 @@ def chatbot_response(prompt):
 def main():
     st.title("Tech Bandits Object Detection Tool with Chatbot")
     st.write("Upload an image to perform object detection using YOLOv8.")
+
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
     if uploaded_file is not None:
         img = Image.open(uploaded_file)
         img_with_boxes, detected_objects = detect_objects(img)
         st.image(img, caption='Uploaded Image', use_column_width=True)
         st.image(img_with_boxes, caption='Detected Objects', use_column_width=True)
+
         if detected_objects:
             st.write("### Object Descriptions")
             objects_description = chatbot_response(f"Can you give a short description of the following objects: {', '.join(detected_objects)}?")
             st.write(objects_description)
+
     st.write("## Chat with Bandits chatbot")
     user_input = st.text_input("Ask Gemini AI anything:")
+
     if st.button("Send"):
         if user_input:
             conversation_response = chatbot_response(user_input)
